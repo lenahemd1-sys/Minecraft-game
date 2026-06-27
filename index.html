@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Craft3D</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="in-menu">
+<div id="game"></div>
+
+<canvas id="crosshair" width="15" height="15"></canvas>
+
+
+<!-- Top bar: Pause + Chat (shown only while in-game) -->
+<div id="top-bar" class="hidden">
+  <button class="top-btn top-icon-btn" id="top-pause" title="Pause"><canvas id="pause-icon" width="20" height="20"></canvas></button>
+  <button class="top-btn top-icon-btn" id="top-chat" title="Chat"><img class="mc-icon" src="https://cdn.jsdelivr.net/gh/InventivetalentDev/minecraft-assets@1.20.1/assets/minecraft/textures/gui/icons.png" id="chat-icon-img" alt="Chat" draggable="false" style="display:none"><canvas id="chat-icon" width="20" height="20"></canvas></button>
+</div>
+
+
+<!-- Chat system -->
+<div id="chat-wrap">
+  <div id="chat-log"></div>
+  <div id="chat-input-row">
+    <span id="chat-prefix">▶</span>
+    <input id="chat-input" type="text" maxlength="200" autocomplete="off" spellcheck="false" placeholder="Type a message or /command..." />
+  </div>
+</div>
+<div id="chat-hint">Press T to chat &nbsp;|&nbsp; /help for commands</div>
+
+<!-- Action message (left side, above hotbar) -->
+<div id="action-msg"></div>
+
+<div id="hearts"></div>
+<div id="hunger"></div>
+
+<div id="hud-bottom">
+  <div id="hotbar-row">
+    <div id="hotbar"></div>
+    <div id="inv-btn" title="Inventory">
+      <canvas id="inv-dot-icon" class="dot-icon" width="24" height="24"></canvas>
+    </div>
+  </div>
+</div>
+
+
+<!-- Old Minecraft Bedrock dim backdrop -->
+<div id="inv-backdrop"></div>
+
+
+<div id="inv-panel" class="hidden">
+  <div id="inv-header">
+    <span id="inv-title">Inventory</span>
+    <button id="inv-close">Done</button>
+  </div>
+  <div id="inv-subtitle">Select a block to place it in your hotbar</div>
+  <div id="inv-grid"></div>
+</div>
+
+<div id="break-flash"></div>
+
+<div id="fs-corner">⛶ FULLSCREEN</div>
+
+<div id="overlay">
+  <div id="menu-title"><img src="https://cdn.jsdelivr.net/gh/InventivetalentDev/minecraft-assets@1.20.1/assets/minecraft/textures/gui/title/minecraft.png" alt="Minecraft" draggable="false"></div>
+  <div id="menu-subtitle">A MINECRAFT-STYLE SANDBOX</div>
+
+  <!-- Main menu buttons -->
+  <div id="menu-main">
+    <button class="menu-btn" id="play-btn">▶ &nbsp;PLAY WORLD</button>
+    <button class="menu-btn" id="play-multi-btn">☁ &nbsp;PLAY MULTIPLAYER</button>
+    <button class="menu-btn" id="settings-btn">⚙ &nbsp;SETTINGS</button>
+  </div>
+
+  <!-- Tabbed Play Panel (Worlds + Multiplayer) -->
+  <div id="play-panel" class="hidden">
+    <div class="play-tabs-row">
+      <div class="play-tab active" id="tab-worlds">
+        <span class="tab-icon"><svg width="18" height="18" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+          <rect x="2" y="0" width="5" height="1" fill="currentColor"/>
+          <rect x="1" y="1" width="2" height="1" fill="currentColor"/><rect x="4" y="1" width="1" height="1" fill="currentColor"/><rect x="6" y="1" width="2" height="1" fill="currentColor"/>
+          <rect x="0" y="2" width="1" height="1" fill="currentColor"/><rect x="2" y="2" width="2" height="1" fill="currentColor"/><rect x="5" y="2" width="3" height="1" fill="currentColor"/>
+          <rect x="0" y="3" width="2" height="1" fill="currentColor"/><rect x="3" y="3" width="5" height="1" fill="currentColor"/>
+          <rect x="0" y="4" width="3" height="1" fill="currentColor"/><rect x="4" y="4" width="4" height="1" fill="currentColor"/>
+          <rect x="0" y="5" width="2" height="1" fill="currentColor"/><rect x="3" y="5" width="5" height="1" fill="currentColor"/>
+          <rect x="1" y="6" width="2" height="1" fill="currentColor"/><rect x="4" y="6" width="3" height="1" fill="currentColor"/>
+          <rect x="1" y="7" width="3" height="1" fill="currentColor"/><rect x="5" y="7" width="2" height="1" fill="currentColor"/>
+          <rect x="2" y="8" width="5" height="1" fill="currentColor"/>
+        </svg></span> WORLDS
+      </div>
+      <div class="play-tab" id="tab-multi">
+        <span class="tab-icon"><svg width="22" height="18" viewBox="0 0 11 9" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+          <!-- Person 1 head -->
+          <rect x="0" y="0" width="3" height="3" fill="currentColor"/>
+          <!-- Person 1 body -->
+          <rect x="0" y="3" width="3" height="2" fill="currentColor" opacity="0.7"/>
+          <!-- Person 1 legs -->
+          <rect x="0" y="5" width="1" height="2" fill="currentColor"/>
+          <rect x="2" y="5" width="1" height="2" fill="currentColor"/>
+          <!-- Person 2 head (offset right, slightly smaller / behind) -->
+          <rect x="5" y="1" width="3" height="3" fill="currentColor" opacity="0.85"/>
+          <!-- Person 2 body -->
+          <rect x="5" y="4" width="3" height="2" fill="currentColor" opacity="0.6"/>
+          <!-- Person 2 legs -->
+          <rect x="5" y="6" width="1" height="2" fill="currentColor" opacity="0.85"/>
+          <rect x="7" y="6" width="1" height="2" fill="currentColor" opacity="0.85"/>
+        </svg></span> MULTIPLAYER
+      </div>
+    </div>
+    <div class="play-panel-body">
+
+      <!-- Worlds tab content -->
+      <div class="play-tab-content active" id="tc-worlds">
+        <button class="menu-btn worlds-create-btn" id="worlds-create-btn" style="width:100%;margin:0 0 10px;">CREATE NEW WORLD</button>
+        <div id="worlds-list"></div>
+        <div id="worlds-empty" class="worlds-empty hidden">
+          <div class="worlds-empty-icon"><svg width="48" height="48" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+          <rect x="2" y="0" width="5" height="1" fill="#4a9"/>
+          <rect x="1" y="1" width="2" height="1" fill="#4a9"/><rect x="4" y="1" width="1" height="1" fill="#4a9"/><rect x="6" y="1" width="2" height="1" fill="#4a9"/>
+          <rect x="0" y="2" width="1" height="1" fill="#4a9"/><rect x="2" y="2" width="2" height="1" fill="#6be"/><rect x="5" y="2" width="3" height="1" fill="#4a9"/>
+          <rect x="0" y="3" width="2" height="1" fill="#4a9"/><rect x="3" y="3" width="2" height="1" fill="#6be"/><rect x="6" y="3" width="2" height="1" fill="#4a9"/>
+          <rect x="0" y="4" width="3" height="1" fill="#4a9"/><rect x="4" y="4" width="4" height="1" fill="#6be"/>
+          <rect x="0" y="5" width="2" height="1" fill="#4a9"/><rect x="3" y="5" width="5" height="1" fill="#4a9"/>
+          <rect x="1" y="6" width="2" height="1" fill="#6be"/><rect x="4" y="6" width="3" height="1" fill="#4a9"/>
+          <rect x="1" y="7" width="3" height="1" fill="#4a9"/><rect x="5" y="7" width="2" height="1" fill="#4a9"/>
+          <rect x="2" y="8" width="5" height="1" fill="#4a9"/>
+        </svg></div>
+          <div class="worlds-empty-text">NO WORLDS</div>
+          <div class="worlds-empty-sub">Create your first world to start playing</div>
+        </div>
+      </div>
+
+      <!-- Multiplayer tab content -->
+      <div class="play-tab-content" id="tc-multi">
+
+        <!-- Auth panel (shown when not signed in) -->
+        <div id="mp-auth">
+          <div class="auth-title">
+            MULTIPLAYER</div>
+          <div class="auth-tabs">
+            <button class="auth-tab active" id="auth-tab-signin" onclick="switchAuthTab('signin')">SIGN IN</button>
+            <button class="auth-tab" id="auth-tab-signup" onclick="switchAuthTab('signup')">SIGN UP</button>
+          </div>
+          <div class="mp-row">
+            <label class="mp-label">USERNAME</label>
+            <input type="text" id="auth-username" class="mp-input" placeholder="YourName" maxlength="20" autocomplete="off">
+          </div>
+          <div class="mp-row">
+            <label class="mp-label">PASSWORD</label>
+            <input type="password" id="auth-password" class="mp-input" placeholder="••••••••" maxlength="40" autocomplete="off">
+          </div>
+          <button class="menu-btn" id="auth-submit-btn" onclick="authSubmit()">SIGN IN</button>
+          <div id="mp-auth-status"></div>
+        </div>
+
+        <!-- Friends panel (shown after sign-in) -->
+        <div id="mp-friends">
+          <div id="mp-signed-as">
+            <div class="mp-profile-card">
+              <div class="mp-profile-row">
+                <div class="mp-profile-steve-wrap">
+                  <img id="mp-profile-avatar" src="https://mc-heads.net/avatar/Steve/44" width="44" height="44" class="mp-profile-steve" onerror="this.src='https://mc-heads.net/avatar/Steve/44'" alt="avatar">
+                  <div class="mp-profile-online-dot"></div>
+                </div>
+                <div class="mp-profile-info">
+                  <div class="mp-profile-label">▶ PLAYER</div>
+                  <div class="mp-profile-name" id="mp-signed-name"></div>
+                  <div class="mp-profile-badge">● ONLINE</div>
+                </div>
+              </div>
+              <button class="mp-signout-btn" onclick="signOut()" style="display:flex;align-items:center;justify-content:center;gap:0"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 7 7" style="image-rendering:pixelated;display:inline-block;vertical-align:middle;margin-right:5px">
+  <!-- Door frame -->
+  <rect x="0" y="0" width="1" height="7" fill="#8f3a3a"/>
+  <rect x="0" y="0" width="4" height="1" fill="#8f3a3a"/>
+  <rect x="3" y="0" width="1" height="7" fill="#8f3a3a"/>
+  <rect x="0" y="6" width="4" height="1" fill="#8f3a3a"/>
+  <!-- Door interior -->
+  <rect x="1" y="1" width="2" height="5" fill="#5a1a1a"/>
+  <!-- Door knob -->
+  <rect x="2" y="3" width="1" height="1" fill="#ffdd77"/>
+  <!-- Arrow going right (exit) -->
+  <rect x="4" y="3" width="3" height="1" fill="#ff8888"/>
+  <rect x="5" y="2" width="1" height="1" fill="#ff8888"/>
+  <rect x="5" y="4" width="1" height="1" fill="#ff8888"/>
+</svg>SIGN OUT</button>
+            </div>
+          </div>
+
+          <!-- Search -->
+          <div class="friend-search-row" style="margin-top:10px">
+            <input type="text" id="friend-search-input" placeholder="Search username..." maxlength="20" autocomplete="off">
+            <button onclick="searchUsers()" style="display:flex;align-items:center;gap:5px;padding:7px 10px"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 7 7" style="image-rendering:pixelated;display:block">
+              <rect x="1" y="0" width="3" height="1" fill="#fff"/>
+              <rect x="0" y="1" width="1" height="3" fill="#fff"/><rect x="4" y="1" width="1" height="3" fill="#fff"/>
+              <rect x="1" y="4" width="3" height="1" fill="#fff"/>
+              <rect x="4" y="5" width="1" height="1" fill="#fff"/>
+              <rect x="5" y="6" width="1" height="1" fill="#fff"/>
+            </svg> SEARCH</button>
+          </div>
+          <div id="friend-search-results"></div>
+
+          <!-- Pending requests -->
+          <div class="friends-section-label">FRIEND REQUESTS</div>
+          <div id="friends-pending"><div style="color:#555;font-size:11px">No pending requests</div></div>
+
+          <!-- Friends list -->
+          <div class="friends-section-label">FRIENDS</div>
+          <div id="friends-list"><div style="color:#555;font-size:11px">No friends yet — search for someone!</div></div>
+
+          <div id="mp-friends-status"></div>
+        </div>
+
+        <div id="mp-status"></div>
+      </div>
+
+      <button class="menu-btn" id="play-back-btn" style="width:100%;margin-top:10px;">◀ &nbsp;BACK</button>
+    </div>
+  </div>
+
+  <!-- Create world panel -->
+  <div id="create-panel" class="hidden">
+    <div class="panel-title">CREATE WORLD</div>
+    <div class="mp-row">
+      <label class="mp-label">WORLD NAME</label>
+      <input type="text" id="world-name-input" class="mp-input" placeholder="My World" maxlength="24" autocomplete="off">
+    </div>
+    <div class="mp-row">
+      <label class="mp-label">GAME MODE</label>
+      <div class="mode-btns">
+        <button class="mode-btn active" id="mode-survival">⚔ SURVIVAL</button>
+        <button class="mode-btn" id="mode-creative">🔨 CREATIVE</button>
+      </div>
+    </div>
+    <button class="menu-btn" id="create-confirm-btn">▶ &nbsp;CREATE WORLD</button>
+    <button class="menu-btn" id="create-back-btn">◀ &nbsp;BACK</button>
+  </div>
+
+  <!-- mp-panel kept as hidden stub so JS refs don't break -->
+  <div id="mp-panel" class="hidden"></div>
+  <div id="worlds-panel" class="hidden"></div>
+
+  <!-- Settings Panel -->
+  <div id="settings-panel" class="hidden">
+    <div class="panel-title">SETTINGS</div>
+
+    <div class="setting-section">CAMERA</div>
+    <div class="setting-row">
+      <span class="setting-label">CAMERA MODE</span>
+      <div class="toggle-row" style="flex:1">
+        <button class="toggle-btn active" id="cam-first">FIRST PERSON</button>
+        <button class="toggle-btn" id="cam-third">THIRD PERSON</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">FOV</span>
+      <input type="range" class="setting-slider" id="fov-slider" min="50" max="120" step="1" value="75">
+      <span class="setting-val" id="fov-val">75°</span>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">MOUSE SPEED</span>
+      <input type="range" class="setting-slider" id="mouse-sens-slider" min="1" max="20" step="1" value="5">
+      <span class="setting-val" id="mouse-sens-val">5</span>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">TOUCH SPEED</span>
+      <input type="range" class="setting-slider" id="touch-sens-slider" min="1" max="20" step="1" value="8">
+      <span class="setting-val" id="touch-sens-val">8</span>
+    </div>
+
+    <div class="setting-divider"></div>
+    <div class="setting-section">GRAPHICS</div>
+    <div class="setting-row">
+      <span class="setting-label">QUALITY</span>
+      <div class="toggle-row" style="flex:1">
+        <button class="toggle-btn" id="gfx-fast">FAST</button>
+        <button class="toggle-btn active" id="gfx-fancy">FANCY</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">RENDER DIST</span>
+      <input type="range" class="setting-slider" id="fog-slider" min="40" max="160" step="10" value="110">
+      <span class="setting-val" id="fog-val">110</span>
+    </div>
+
+    <div class="setting-divider"></div>
+    <div class="setting-section">DISPLAY</div>
+    <div class="setting-row">
+      <span class="setting-label">FPS COUNTER</span>
+      <div class="toggle-row" style="flex:1">
+        <button class="toggle-btn" id="fps-on">ON</button>
+        <button class="toggle-btn active" id="fps-off">OFF</button>
+      </div>
+    </div>
+
+    <button class="menu-btn" id="settings-back-btn" style="margin-top:18px;">◀ &nbsp;BACK</button>
+  </div>
+
+  <!-- Loading screen (shown while world generates) -->
+  <div id="menu-loading" class="hidden">
+    <div id="loading-msg">Loading...</div>
+  </div>
+
+  <!-- Fan project disclaimer -->
+  <div id="menu-disclaimer">Not made by Mojang &bull; Fan Project</div>
+</div>
+
+<!-- In-game Pause Menu -->
+<div id="pause-menu" class="hidden">
+  <div id="pause-box">
+    <div id="pause-title">PAUSED</div>
+    <div id="pause-settings-panel">
+      <div class="setting-section">CAMERA</div>
+      <div class="setting-row">
+        <span class="setting-label">CAMERA MODE</span>
+        <div class="toggle-row" style="flex:1">
+          <button class="toggle-btn active" id="p-cam-first">FIRST PERSON</button>
+          <button class="toggle-btn" id="p-cam-third">THIRD PERSON</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">FOV</span>
+        <input type="range" class="setting-slider" id="p-fov-slider" min="50" max="120" step="1" value="75">
+        <span class="setting-val" id="p-fov-val">75°</span>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">MOUSE SPEED</span>
+        <input type="range" class="setting-slider" id="p-mouse-sens-slider" min="1" max="20" step="1" value="5">
+        <span class="setting-val" id="p-mouse-sens-val">5</span>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">TOUCH SPEED</span>
+        <input type="range" class="setting-slider" id="p-touch-sens-slider" min="1" max="20" step="1" value="8">
+        <span class="setting-val" id="p-touch-sens-val">8</span>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="setting-section">GRAPHICS</div>
+      <div class="setting-row">
+        <span class="setting-label">QUALITY</span>
+        <div class="toggle-row" style="flex:1">
+          <button class="toggle-btn" id="p-gfx-fast">FAST</button>
+          <button class="toggle-btn active" id="p-gfx-fancy">FANCY</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">RENDER DIST</span>
+        <input type="range" class="setting-slider" id="p-fog-slider" min="40" max="160" step="10" value="110">
+        <span class="setting-val" id="p-fog-val">110</span>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="setting-section">DISPLAY</div>
+      <div class="setting-row">
+        <span class="setting-label">FPS COUNTER</span>
+        <div class="toggle-row" style="flex:1">
+          <button class="toggle-btn" id="p-fps-on">ON</button>
+          <button class="toggle-btn active" id="p-fps-off">OFF</button>
+        </div>
+      </div>
+      <div class="setting-divider"></div>
+    </div>
+    <button class="menu-btn" id="pause-resume-btn">▶ &nbsp;KEEP PLAYING</button>
+    <button class="menu-btn" id="pause-settings-btn">⚙ &nbsp;SETTINGS</button>
+    <button class="menu-btn" id="pause-quit-btn" style="color:#ffaaaa;">✖ &nbsp;QUIT TO TITLE</button>
+  </div>
+</div>
+
+<!-- Game Over Screen -->
+<div id="gameover-screen" class="hidden">
+  <div id="gameover-content">
+    <div id="gameover-title">YOU DIED!</div>
+    <div id="gameover-msg">Player died</div>
+    <div id="gameover-score"></div>
+    <button class="gameover-btn respawn-btn" id="gameover-respawn">↺ &nbsp;RESPAWN</button>
+    <button class="gameover-btn quit-btn" id="gameover-quit">✖ &nbsp;QUIT TO TITLE</button>
+  </div>
+</div>
+
+<!-- FPS Counter -->
+<div id="fps-counter" class="hidden">0 FPS</div>
+
+<!-- Incoming invite notification: shown over the game or menu, accept/deny -->
+<div id="mp-incoming" class="hidden">
+  <div id="mp-incoming-text"></div>
+  <div id="mp-incoming-btns">
+    <button class="mp-accept-btn" id="mp-accept-btn">✔ ACCEPT</button>
+    <button class="mp-deny-btn" id="mp-deny-btn">✘ DENY</button>
+  </div>
+</div>
+
+<!-- Sign Editor -->
+<div id="sign-editor" class="hidden">
+  <div id="sign-editor-box">
+    <div id="sign-editor-title">✏  EDIT SIGN</div>
+    <div id="sign-preview-wrap">
+      <canvas id="sign-preview-canvas" width="236" height="80"></canvas>
+    </div>
+    <input type="text" class="sign-line" id="sign-line-0" maxlength="15" placeholder="Line 1" autocomplete="off" spellcheck="false">
+    <input type="text" class="sign-line" id="sign-line-1" maxlength="15" placeholder="Line 2" autocomplete="off" spellcheck="false">
+    <input type="text" class="sign-line" id="sign-line-2" maxlength="15" placeholder="Line 3" autocomplete="off" spellcheck="false">
+    <input type="text" class="sign-line" id="sign-line-3" maxlength="15" placeholder="Line 4" autocomplete="off" spellcheck="false">
+    <button class="menu-btn" id="sign-done-btn">✔  DONE</button>
+  </div>
+</div>
+
+<div id="mobile">
+  <div id="touch-hint">Drag right side to look</div>
+  <div id="dpad">
+    <div id="dpad-grid">
+      <div class="dpad-empty"></div>
+      <div class="dpad-btn" id="dpad-up">
+        <canvas class="dpad-arrow-canvas" id="dpad-cv-up" width="24" height="24"></canvas>
+      </div>
+      <div class="dpad-empty"></div>
+      <div class="dpad-btn" id="dpad-left">
+        <canvas class="dpad-arrow-canvas" id="dpad-cv-left" width="24" height="24"></canvas>
+      </div>
+      <div class="dpad-btn" id="dpad-center">
+        <canvas class="dpad-center-canvas" id="dpad-cv-center" width="20" height="20"></canvas>
+      </div>
+      <div class="dpad-btn" id="dpad-right">
+        <canvas class="dpad-arrow-canvas" id="dpad-cv-right" width="24" height="24"></canvas>
+      </div>
+      <div class="dpad-empty"></div>
+      <div class="dpad-btn" id="dpad-down">
+        <canvas class="dpad-arrow-canvas" id="dpad-cv-down" width="24" height="24"></canvas>
+      </div>
+      <div class="dpad-empty"></div>
+    </div>
+  </div>
+  <div id="sneak-label">SNEAK</div>
+
+  <div id="lookpad"></div>
+  <div id="mbtns">
+    <button class="mbtn place" id="m-place">PLACE</button>
+    <button class="mbtn break" id="m-break">BREAK</button>
+    <button class="mbtn jump" id="m-jump">JUMP</button>
+    <button class="mbtn fly-down hidden" id="m-fly-down">▼ DOWN</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+
+<!-- Delete world confirmation modal -->
+<div id="del-confirm-modal" class="hidden">
+  <div id="del-confirm-box">
+    <div id="del-confirm-title">⚠ DELETE WORLD?</div>
+    <div id="del-confirm-msg">This action cannot be undone.<br>Type the world name to confirm:</div>
+    <div id="del-confirm-world-name" style="font-size:12px;color:#ffdd77;letter-spacing:2px;text-shadow:1px 1px 0 #000;"></div>
+    <input id="del-confirm-input" type="text" placeholder="Type world name here..." autocomplete="off" spellcheck="false">
+    <div id="del-confirm-btns">
+      <button id="del-confirm-ok">🗑 DELETE</button>
+      <button id="del-confirm-cancel">CANCEL</button>
+    </div>
+  </div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
